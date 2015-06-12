@@ -24,4 +24,22 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [self loadData];
+}
+
+- (void)loadData {
+    //url
+    NSURL *url = [NSURL URLWithString:@"http://127.0.0.1/web/demo.json"];
+    //NSSession
+    NSURLSession *session = [NSURLSession sharedSession];
+    
+    NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        NSLog(@"%@  %@", response, [NSThread currentThread]);
+    }];
+    [task resume];
+}
+
+
 @end
