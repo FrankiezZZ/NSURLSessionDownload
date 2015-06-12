@@ -8,8 +8,8 @@
 
 #import "ViewController.h"
 
-@interface ViewController ()
-
+@interface ViewController ()<NSURLSessionDownloadDelegate>
+@property (strong, nonatomic) NSURLSession *session;
 @end
 
 @implementation ViewController
@@ -26,20 +26,53 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    [self loadData];
-}
-
-- (void)loadData {
     //url
-    NSURL *url = [NSURL URLWithString:@"http://127.0.0.1/web/demo.json"];
+    NSURL *url = [NSURL URLWithString:@"http://127.0.0.1/html.mp4"];
     //NSSession
-    NSURLSession *session = [NSURLSession sharedSession];
-    
-    NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        NSLog(@"%@  %@", response, [NSThread currentThread]);
-    }];
-    [task resume];
+    [[self.session downloadTaskWithURL:url] resume];
 }
 
+#pragma mark - 代理方法
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
+    NSLog(@"%@", location);
+}
+
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+    
+    float progress = (float)totalBytesWritten / totalBytesExpectedToWrite;
+    NSLog(@"have downloaded: %f  %@", progress, [NSThread currentThread]);
+}
+
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didResumeAtOffset:(int64_t)fileOffset expectedTotalBytes:(int64_t)expectedTotalBytes {
+    NSLog(@"%s",__FUNCTION__);
+    /*
+     __FUNCTION__   内存正常
+     __func__       内存会有峰值
+     */
+}
+
+
+- (NSURLSession *)session
+{
+    if (_session == nil) {
+        NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
+        _session = [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:nil];
+    }
+    return _session;
+}
 
 @end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
